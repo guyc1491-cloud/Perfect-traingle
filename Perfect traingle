@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Triangle Drawer</title>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+  canvas {
+    border: 2px solid #444;
+    margin-top: 20px;
+    cursor: crosshair;
+    background: #111;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Click 3 points to draw a neon triangle</h2>
+<canvas id="myCanvas" width="600" height="600"></canvas>
+<button onclick="clearCanvas()">Clear</button>
+
+<script>
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+let points = [];
+
+// Function to create gradient along a line
+function drawGradientLine(x1, y1, x2, y2) {
+    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    gradient.addColorStop(0, '#0ff'); // cyan
+    gradient.addColorStop(0.5, '#f0f'); // magenta
+    gradient.addColorStop(1, '#ff0'); // yellow
+
+    ctx.strokeStyle = gradient;
+    ctx.shadowColor = gradient;
+    ctx.shadowBlur = 20; // neon glow
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.shadowBlur = 0; // reset shadow after drawing
+}
+
+// Draw points and triangle
+canvas.addEventListener('click', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    points.push({x, y});
+
+    // Draw glowing point
+    ctx.fillStyle = '#0ff';
+    ctx.shadowColor = '#0ff';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Draw lines dynamically if there are at least 2 points
+    if(points.length >= 2) {
+        drawGradientLine(points[points.length-2].x, points[points.length-2].y,
+                         points[points.length-1].x, points[points.length-1].y);
+    }
+
+    // Draw full triangle if 3 points
+    if(points.length === 3) {
+        drawGradientLine(points[2].x, points[2].y, points[0].x, points[0].y);
+        points = []; // reset for next triangle
+    }
+});
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    points = [];
+}
+</script>
+
+</body>
+</html>
